@@ -1,0 +1,44 @@
+---
+title: "homework09"
+author: "Jiapeng Wang"
+date: "2023-12-06"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r cars}
+level <- c(9,10,9,8,9,8,8,8,7,6,9,10,11,9,10,11,
+           11,11,11,10,11,12,13,12,13,12,14,15,14,12,13,13,
+           12,13,13,13,13,13,10,8,9,8,6,7,7,6,5,6,
+           5,6,4,5,4,4,2,4,5,4,5,6,5,5,6,5,
+           6,7,8,8,8,7,9,10,9,10,9,8,9,8,7,7,
+           8,7,7,7,8,8,8,8,7,6,5,6,5,6,7,6,
+           6,5,6,6,5,4,3,4,5,5,6,5,6,7,6,5)
+n = 16 * 7 - 3
+
+y = rep(1,n+1)
+
+for (i in 1:n){
+  y1 = level[i]
+  y2 = level[i+1]
+  y3 = level[i+2]
+  y4 = level[i+3]
+  y[i] = (y1 + y2) / 2 - (y3 + y4) / 2
+}
+
+y[n+1] = (8 + 6) / 2 - (3 + 4) / 2
+
+x1 = rep(1,n+1)
+x1[n+1] = 2
+x2 = 0:n+1
+
+anova(lm(y~x1))
+anova(lm(y~x1+x2))
+anova(lm(y~x1+x2+x1*x2))
+```
+

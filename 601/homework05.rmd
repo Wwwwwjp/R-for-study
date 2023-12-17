@@ -1,0 +1,71 @@
+---
+title: "homework05"
+author: "Jiapeng Wang"
+date: "2023-10-31"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list = ls())
+library(survival)
+library(MASS)
+library(survival)
+library(dplyr)
+setwd('E:/stat-visp/601')
+```
+
+*Some Code for Question1:*
+```{r}
+z <- read.csv("lungcancer.csv")
+z$city <- as.factor(z$city)
+z$age <- as.factor(z$age)
+mean(z$cases/z$pop)
+glm(cases/pop ~ city + age, weight=pop, family='binomial', data=z)
+glm(cases ~ city + age, offset=log(pop), family='poisson', data=z)
+```
+
+
+
+*Question2:*
+
+1.Reproduce the plot on page 117:
+```{r, fig.width=10, fig.height=7}
+z <- read.csv("cancerdata.csv")
+leg.txt <- c("horTh = no","horTh = yes")
+leg.col <- c("blue","red")
+leg.lty <- rep(1,2)
+y <- z$time
+stat <- z$death
+treat <- z$horTh
+fit.bytreat <- survfit(Surv(y,stat) ~ treat, conf.type="none")
+plot(fit.bytreat,conf.int=FALSE,
+     col=leg.col,mark.time=FALSE,
+     lwd=3,
+     main='Kaplan-Meier survival curves',
+     xlab='Days',
+     ylab='Survival probability')
+legend("bottomleft",legend=leg.txt,lty=leg.lty,col=leg.col,lwd=3)
+
+```
+
+2.fit a Cox PH model to the breastcancer data with two-factor interactions with treatment added:
+```{r}
+summary(coxph(Surv(time, death)~ treat , data=z))
+summary(coxph(Surv(time, death)~ . , data=z))
+formula = as.formula(Surv(time, death) ~ horTh + horTh:age + horTh:tsize + 
+                        horTh:tgrade + horTh:pnodes + horTh:progrec + 
+                        horTh:estrec + horTh:menostat)
+
+model = coxph(formula, data=z)
+summary(model)
+```
+*Conclusion:*
+
+
+First, from the reproduction of plot, we get that horTh is effective to the survival probability. We can also prove this by the p-value = 0.0036 in summary(coxph(Surv(time, death)~ treat , data=z)). Thus, the coefficient of 'treat' has statistical difference from 0.
+
+Also, from the Cox PH model(same as page 119 in slides), we can denote that tgrade, pnodes and progrec have significant effect as well.
+
+Then from the model with two-factor interactions, we consider the influence caused by horTh and other factors together. From the model summary, it can be observed that the variables pnodes and progrec have a significant impact on the survival probability under this situation. Besides, one particular thing is that pnodes has a significant effect on patients regardless of whether they are treated with horTh. However, the influence of progrec varies depending on whether the patient is treated with horTh or not. When the patient is treated with horTh, he/she is much likely to be influenced by progrec.

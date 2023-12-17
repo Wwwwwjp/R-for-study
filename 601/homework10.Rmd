@@ -1,0 +1,65 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+rat_data <- data.frame(
+  group = rep(c("Control", "Drug_A_Low", "Drug_A_High", "Drug_B_Low", "Drug_B_High"), each = 4),
+  score = c(10, 13, 17, 20, 8, 16, 12, 19, 12, 10, 7, 3, 18, 11, 15, 22, 21, 17, 26, 28)
+)
+model_anova <- aov(rat_data$score ~ rat_data$group)
+anovaResults <- anova(model_anova)
+print(anovaResults)
+
+contrast_inverse <- matrix(c(1, 1, 1, 1, 1,
+                             1, -1/4, -1/4, -1/4, -1/4,
+                             0, 1/2, 1/2, -1/2, -1/2,
+                             0, 1, -1, 0, 0,
+                             0, 0, 0, 1, -1), nrow = 5, byrow = TRUE)
+contrast <- solve(contrast_inverse)
+
+
+c1 <- c(1, -1/4, -1/4, -1/4, -1/4)
+c2 <- c(0, 1/2, 1/2, -1/2, -1/2)
+c3 <- c(0, 1, -1, 0, 0)
+c4 <- c(0, 0, 0, 1, -1) 
+
+s = 20.783
+alpha <- 0.05/4
+df <- 15
+t_value <- qt(alpha, df, lower.tail = FALSE)
+t <- t_value
+
+calculate_interval <- function(c, b, t, s) {
+  sum_cb <- sum(c * b)
+  sqrt_term <- sqrt(s * sum((c*c) / 4))
+  lower_bound <- sum_cb - t * sqrt_term
+  upper_bound <- sum_cb + t * sqrt_term
+  return(c(lower_bound, upper_bound))
+}
+
+b <- c(15, 13.75, 8, 16.5, 23)
+
+intervals <- list(
+  calculate_interval(c1, b, t, s),
+  calculate_interval(c2, b, t, s),
+  calculate_interval(c3, b, t, s),
+  calculate_interval(c4, b, t, s)
+)
+intervals
+
+f_value <- qf(0.9, 4, 15)
+f=2*sqrt(f_value)
+intervals <- list(
+  calculate_interval(c1, b, f, s),
+  calculate_interval(c2, b, f, s),
+  calculate_interval(c3, b, f, s),
+  calculate_interval(c4, b, f, s)
+)
+intervals
+```

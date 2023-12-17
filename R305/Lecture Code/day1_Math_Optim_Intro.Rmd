@@ -1,0 +1,193 @@
+---
+title:    'Day 1: Introduction to Mathematical Optimization'
+subtitle: '--- How to understand and formulate a mathematical optimization problem'
+author:   'Bo Yang'
+date:     03/28/2020
+---
+
+## Optimization:
+
+To optimize (or minimize) a **continus** function $f(\textbf{x}):\textbf{R}^n\rightarrow\textbf{R}$ is to find $\textbf{x}_0\in A\subseteq\textbf{R}^n$ so that $f(\textbf{x}_0)\le f(\textbf{x})$ for all $\textbf{x}\in A\subseteq\textbf{R}^n$.  
+
+Actually, optimization is a very huge field. Here, I'll just show you a brief introduction in two or three lectures. My lecture is based on our handout, but I will present it in the different way. In Day 1, let me emphasize the importance of formulating an optimization problem rigorously.
+
+
+### 1. Objective Function
+a. Function (continuous with multiple variables and having a scalar value): $f(\textbf{x}):\textbf{R}^n\rightarrow\textbf{R}$.  
+How to choose it in practice is interesting and tricky. See part.1b, 4b, 4c below.
+
+b. Mininization (or Maximization):  
+They can be converted into each other by changing the sign of objective function as below:  
+$$\text{max}_{\textbf{x}\in A} f(\textbf{x})\iff \text{min}_{\textbf{x}\in A}[-f(\textbf{x})]$$
+c. Equivalent Objective Functions:  
+There are some other equivalent objective functions. For example, note that $x^3$ is an increasing function,
+$$\text{min}_{\textbf{x}\in A} f(\textbf{x})\iff \text{min}_{\textbf{x}\in A}[f(\textbf{x})]^3.$$
+Or, if $f(\textbf{x})$ is always positive, 
+$$\text{max}_{\textbf{x}\in A} f(\textbf{x})\iff \text{max}_{\textbf{x}\in A}\log[f(\textbf{x})]$$
+because $\log()$ is also an increasing function. It will be used in part.4f and 4g.
+
+### 2. Changing Variables
+a. During the optimization, which variables are changing and which variables are fixed like constants?  
+See part.4a, 4b, 4c below.
+
+b. Dimension, Domain and Constraints:  
+* Dimension: the dimension of changing variables, i.e., $n$ above;
+* Domain (Search Space or Choice Set): the range of changing variables, i.e., $A$ above;
+* Constraint: equalities or inequalities that the changing variables have to satisfy, such as:  
+$$\text{min}_{(x, y)\in\textbf{R}^2\text{ and }x^2 + y^2 = 1} f(x, y),$$
+where $x^2+y^2 = 1$ is a constraint.
+
+c. The simplest case discussed in this introduction:  
+* dimension satisfies $1\le n\le 2$;
+* domain always looks like a box, such as $(x, y)\in A = [a_1, b_1]\times[a_2, b_2]\subseteq\textbf{R}^2$, i.e., $a_1\le x\le b_1$ and $a_2\le y\le b_2$, where the limits $a_i, b_i (i = 1, 2)$ could be finite or infinite; 
+* no constraint.
+
+
+### 3. Formulation:  
+Identify every element in part.1 and 2 from the standard form (in 2-D case):
+
+$$\text{min}_{(x, y)\in A\subseteq\textbf{R}^2} f(x, y; a, b, ...) $$
+Then, you can define the objective function in R. See part.4 for more details.
+
+### 4. Application in Statistics: Estimation and Regression
+a. Simple Linear Regression (SLR) (in handout)  
+* Motivation: If you forget this fundamental SLR, [watch the video (just from 0:00 to 3:17)](https://www.youtube.com/watch?v=coQAAN4eY5s) first. Also, see the graph below:  
+![](day1_regressioncurv.png)  
+to understand SLR geometrically. Then, formulate the related optimization problem **strictly** as shown below:  
+* Objective function: 
+$$SSE\left(\hat{\beta}_0, \hat{\beta}_1; \{(x_i, y_i)\}\right) 
+= \sum e_i^2 = \sum (y_i - \hat{y_i})^2 = \sum \left(y_i - (\hat{\beta_0} + \hat{\beta_1}x_i)\right)^2$$
+* Goal: Minimize $SSE$
+* Changing variables: $\hat{\beta}_0, \hat{\beta}_1$, which determine the best fitting line.
+* Fixed variables: $(x_i, y_i)$, which are fixed observed data.
+* Dimension: $n = 2$, from $\hat{\beta}_0, \hat{\beta}_1$.
+* Domain: $-\infty < \hat{\beta}_0 < +\infty, -\infty < \hat{\beta}_1 < +\infty$, i.e., $A = \textbf{R}^2$.
+* Constraint: none
+* Definition of $SSE()$ in R for the future use:
+```{r}
+# usual least squares function SSE()
+# beta is 2-dim and changing
+# x, y are fixed and should be considered as constants
+SSE = function(beta, x, y) { 
+  return(sum((y - (beta[1] + beta[2] * x))^2))
+}
+
+# Optional task: If you like, you can compute its gradient by calculus and define it in R.
+```
+b. Robust Regression (in HW1 part1)  
+* Motivation: First, review STAT304 HW3 part1, [Jackknife method](http://pages.stat.wisc.edu/~byang/304/3/HW3.html) to understand the effects of the annoying outliers (Alaska, instead of Texas) in SLR. In order to weaken the outlier's effect (Robust Regression), we are going to find a better objective function $Tukey()$ with $\rho()$ function, instead of square function. Then, read HW1 part1 carefully and if you like, [watch this video](https://www.youtube.com/watch?v=7a_6roLjwaA), where the motivation of the new objective function is explained clearly, but the notation is slightly different ($\rho()$ function is called Huber M Estimator). At last, formulate the related optimization problem **strictly** as shown below:  
+* Objective function: $Tukey\left(\beta_0, \beta_1; \{(x_i, y_i)\}\right)$
+* Goal: Minimize $Tukey()$
+* Changing variables: $\beta_0, \beta_1$, which determine the best fitting line.
+* Fixed variables: $(x_i, y_i)$, which are fixed observed data.
+* Dimension: $n = 2$, from $\beta_0, \beta_1$.
+* Domain: $-\infty < \beta_0 < +\infty, -\infty < \beta_1 < +\infty$, i.e., $A = \textbf{R}^2$.
+* Constraint: none
+* Definition of $Tukey()$ and others in R for the future use:
+```{r}
+# new objective function S() based on Robust Regression
+# beta is 2-dim and changing
+# x, y are fixed and should be considered as constants
+# Need two auxiliary functions rho() and Tukey() to replace the square function
+rho = function(t, k) { # k is the threshold
+  # translate rho()'s formula in HW1 part1 to R code here  
+}
+
+Tukey = function(beta, x, y){
+  # translate Tukey()'s formula in HW1 part1 to R code here
+  # might need to call rho() defined above
+}
+
+# Also, for the future use, define two more derivative functions rho.prime() and Tukey.gr()
+rho.prime = function(t, k) { # k is the threshold
+  # translate rho.prime()'s formula in HW1 part1 to R code here  
+}
+
+Tukey.gr = function(beta0, beta1){
+  # translate Tukey.gr()'s formula in HW1 part1 to R code here
+  # might need to call rho.prime() defined above
+}
+```
+
+c. Least Absolute Deviation Regression (LAD) (in HW2 part1)  
+* Motivation: First, review STAT304 HW3 part1, [Jackknife method](http://pages.stat.wisc.edu/~byang/304/3/HW3.html) to understand the effects of the annoying outliers (Alaska, instead of Texas) in SLR. In order to weaken the outlier's effect (Robust Regression), we are going to find a better objective function $LAD()$ with the absolute value function $abs()$, instead of square function. Then, read HW2 part1 carefully and if you like, [watch this video](https://www.youtube.com/watch?v=7a_6roLjwaA), where the motivation and disadvantage of the new objective function is explained clearly, but the notation is slightly different. Remember that $LAD()$ contains $abs()$, which is not differentiable everywhere. So, $LAD()$ is also not differentiable everywhere. At last, formulate the related optimization problem **strictly** as shown below:  
+* Objective function: $LAD\left(\beta_0, \beta_1; \{(x_i, y_i)\}\right)$, not differentiable everywhere.
+* Goal: Minimize $LAD$
+* Changing variables: $\beta_0, \beta_1$, which determine the best fitting line.
+* Fixed variables: $(x_i, y_i)$, which are fixed observed data.
+* Dimension: $n = 2$, from $\beta_0, \beta_1$.
+* Domain: $-\infty < \beta_0 < +\infty, -\infty < \beta_1 < +\infty$, i.e., $A = \textbf{R}^2$.
+* Constraint: none
+* Definition of $LAD()$ in R for the future use:
+```{r}
+# new objective function LAD() based on LAD
+# beta is 2-dim and changing
+# x, y are fixed and should be considered as constants
+LAD = function(beta, x, y) { 
+  # translate LAD()'s formula in HW2 part1 to R code here
+}
+# There is no need to define any derivative functions.
+```
+
+d. Problems in Group Practices  
+They are quite straightforward. Do them first with your teammates or discuss them on Piazza.
+
+e. Exponential Smoothing (in HW1 part2)
+* Motivation: see HW1 part2
+* Objective function: $FE\left(\beta; Y_i\right)$, sum of square, differentiable everywhere. But its derivative is difficult to calculate.
+* Goal: Minimize $FE$
+* Changing variables: $\beta$, which determine the best exponential smoothing model.
+* Fixed variables: $Y_i$, which are fixed observed data.
+* Dimension: $n = 1$, from $\beta$.
+* Domain: find it by yourself.
+* Constraint: none
+* Definition of $FE()$ in R for the future use:
+```{r}
+# new objective function FE() based on Exponential Smoothing
+# beta is 1-dim and changing
+# Y are fixed and should be considered as constants
+FE = function(beta, Y) { 
+  # translate FE()'s formula in HW2 part2 to R code here
+}
+# There is no need to define any derivative functions.
+```
+
+f. Maximum Likelihood Estimation (MLE) (in HW1 part3a)
+* Motivation: see HW1 part3a
+* Objective function: First, it should be the likelihood function $L()$. Then, for the mathematical convenience, we choose the equivalent objective function: log likelihood function $l() = log(L())$ (see part.1c).  
+* Goal: find it by yourself.
+* Changing variables: find it by yourself **carefully**.
+* Fixed variables: find it by yourself **carefully**.
+* Dimension: find it by yourself.
+* Domain: find it by yourself.
+* Constraint: find it by yourself.
+* Definition of $l()$ in R for the future use:
+```{r}
+# new objective function FE() based on MLE for Normal Distribution
+# 
+# 
+l = function(...) { 
+  # translate l()'s formula in HW1 part3a to R code here
+}
+# There is no need to define any derivative functions unless you are good at the chain rules.
+```
+
+g. Logistic Regression (in HW1 part3b)
+* Motivation: see HW1 part3b
+* Objective function: First, it should be the likelihood function $L()$. Then, for the mathematical convenience, we choose the equivalent objective function: log likelihood function $l() = log(L())$ (see part.1c).  
+* Goal: find it by yourself.
+* Changing variables: find it by yourself **carefully**.
+* Fixed variables: find it by yourself **carefully**.
+* Dimension: find it by yourself.
+* Domain: find it by yourself.
+* Constraint: find it by yourself.
+* Definition of $l()$ in R for the future use:
+```{r}
+# new objective function l() based on MLE in Logistic Regression
+# 
+# 
+l = function(...) {
+  # translate FE()'s formula in HW1 part3b to R code here
+}
+# There is no need to define any derivative functions unless you are good at the chain rules.
+```
